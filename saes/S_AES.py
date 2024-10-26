@@ -285,6 +285,34 @@ def cbc_decrypt(cipher: str, key: int, iv: int) -> str:
     return blocks_to_string(plain)
 
 
+# 中间相遇攻击
+def attack(plaintexts: str, ciphertexts: str) -> int:
+    plaintexts = plaintexts.split()
+    ciphertexts = ciphertexts.split()
+
+    possible_keys = {}
+
+    # 遍历所有明文
+    for plain in plaintexts:
+        plain_int = int(plain, 2)
+        for k1 in range(0x10000):
+            mid_value = encrypt(plain_int, k1)
+            if mid_value not in possible_keys:
+                possible_keys[mid_value] = k1
+
+    # 遍历所有密文
+    for cipher in ciphertexts:
+        cipher_int = int(cipher, 2)
+        for k2 in range(0x10000):
+            mid_value = decrypt(cipher_int, k2)
+            if mid_value in possible_keys:
+                k1 = possible_keys[mid_value]
+                return (k1 << 16) | k2
+
+    return None  # 如果没有找到有效密钥
+
+
+
 if __name__ == '__main__':
     # 乘法测试
     a = 0b0011  # 3
@@ -342,3 +370,13 @@ if __name__ == '__main__':
     # 字符串解密
     decrypted_text = decrypt_string('éVÍ^]bGíL¶È\'M', key)
     print("字符串解密结果:", decrypted_text)
+
+    # 中间相遇攻击测试
+    plaintexts = "1010011101001001 0101010101010101"
+    ciphertexts = "1100001101001001 1111111111111111"
+
+    found_key = attack(plaintexts, ciphertexts)
+    if found_key is not None:
+        print(f"找到的密钥: {found_key:016b}")
+    else:
+        print("未找到密钥")
