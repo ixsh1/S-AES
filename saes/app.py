@@ -1,14 +1,19 @@
 import tkinter as tk
-from tkinter import messagebox, Toplevel, Label
-from S_AES import encrypt, decrypt, encrypt_string, decrypt_string, double_encrypt, double_decrypt, triple_encrypt, triple_decrypt, cbc_encrypt, cbc_decrypt
+from tkinter import messagebox, Toplevel, Text, Button
+from S_AES import encrypt, decrypt, encrypt_string, decrypt_string, double_encrypt, double_decrypt, triple_encrypt, triple_decrypt, cbc_encrypt, cbc_decrypt, attack
 
 
 def show_custom_message(title, message):
     popup = Toplevel(root)
     popup.title(title)
-    popup.geometry("400x200")  # 设置弹窗大小
-    Label(popup, text=message, font=("Arial", 14), wraplength=350).pack(expand=True, pady=20)
-    tk.Button(popup, text="关闭", command=popup.destroy).pack(pady=10)
+    popup.geometry("400x200")
+
+    text_widget = Text(popup, font=("Arial", 14), wrap='word', width=45, height=8)
+    text_widget.insert('1.0', message)
+    text_widget.configure(state='disabled')
+    text_widget.pack(expand=True, pady=20)
+
+    Button(popup, text="关闭", command=popup.destroy).pack(pady=10)
 
 
 def encrypt_1():
@@ -21,7 +26,7 @@ def encrypt_1():
         messagebox.showerror("错误", "密钥必须是16位的二进制字符串。")
         return
     cipher_text = encrypt(int(plain_text, 2), int(key, 2))
-    show_custom_message("加密结果", f"加密得到密文: {cipher_text}")
+    show_custom_message("加密结果", f"加密得到密文: {bin(cipher_text)[2:]}")
 
 
 def decrypt_1():
@@ -34,7 +39,7 @@ def decrypt_1():
         messagebox.showerror("错误", "密钥必须是16位的二进制字符串。")
         return
     plain_text = decrypt(int(cipher_text, 2), int(key, 2))
-    show_custom_message("解密结果", f"解密得到明文: {plain_text}")
+    show_custom_message("解密结果", f"解密得到明文: {bin(plain_text)[2:]}")
 
 
 def encrypt_2():
@@ -46,8 +51,8 @@ def encrypt_2():
     if not key or not (len(key) == 32 and all(char in '01' for char in key)):
         messagebox.showerror("错误", "密钥必须是32位的二进制字符串。")
         return
-    cipher_text = encrypt(int(plain_text, 2), int(key, 2))
-    show_custom_message("加密结果", f"加密得到密文: {cipher_text}")
+    cipher_text = double_encrypt(int(plain_text, 2), int(key, 2))
+    show_custom_message("加密结果", f"加密得到密文: {bin(cipher_text)[2:]}")
 
 
 def decrypt_2():
@@ -59,8 +64,8 @@ def decrypt_2():
     if not key or not (len(key) == 32 and all(char in '01' for char in key)):
         messagebox.showerror("错误", "密钥必须是32位的二进制字符串。")
         return
-    plain_text = decrypt(int(cipher_text, 2), int(key, 2))
-    show_custom_message("解密结果", f"解密得到明文: {plain_text}")
+    plain_text = double_decrypt(int(cipher_text, 2), int(key, 2))
+    show_custom_message("解密结果", f"解密得到明文: {bin(plain_text)[2:]}")
 
 
 def encrypt_3():
@@ -72,8 +77,8 @@ def encrypt_3():
     if not key or not (len(key) == 48 and all(char in '01' for char in key)):
         messagebox.showerror("错误", "密钥必须是48位的二进制字符串。")
         return
-    cipher_text = encrypt(int(plain_text, 2), int(key, 2))
-    show_custom_message("加密结果", f"加密得到密文: {cipher_text}")
+    cipher_text = triple_encrypt(int(plain_text, 2), int(key, 2))
+    show_custom_message("加密结果", f"加密得到密文: {bin(cipher_text)[2:]}")
 
 
 def decrypt_3():
@@ -85,8 +90,8 @@ def decrypt_3():
     if not key or not (len(key) == 48 and all(char in '01' for char in key)):
         messagebox.showerror("错误", "密钥必须是48位的二进制字符串。")
         return
-    plain_text = decrypt(int(cipher_text, 2), int(key, 2))
-    show_custom_message("解密结果", f"解密得到明文: {plain_text}")
+    plain_text = triple_decrypt(int(cipher_text, 2), int(key, 2))
+    show_custom_message("解密结果", f"解密得到明文: {bin(plain_text)[2:]}")
 
 
 def encrypt_cbc():
@@ -146,17 +151,17 @@ def decrypt_s():
 def brute_force_crack():
     plain_text = plain_text_entry.get("1.0", tk.END).strip()
     cipher_text = cipher_text_entry.get("1.0", tk.END).strip()
-    keys, time = key_crack(plain_text, cipher_text)
-    show_custom_message("暴力破解结果", f"破解得到密钥: {keys};\n耗时 {time} 秒")
+    keys = attack(plain_text, cipher_text)
+    show_custom_message("暴力破解结果", f"破解得到密钥: {bin(keys)[2:]}")
 
 def show_encrypt_ui():
     clear_ui()
     global plain_text_entry, key_text_entry
     tk.Label(frame, text="请输入明文", font=("Arial", 12)).pack(pady=10)
-    plain_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    plain_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     plain_text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (16位二进制)", font=("Arial", 12)).pack(pady=10)
-    key_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    key_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     key_text_entry.pack(pady=10)
     tk.Button(frame, text="二进制加密", command=encrypt_1, height=1, width=10, font=("Arial", 20)).pack(pady=20)
     tk.Button(frame, text="ascii加密", command=encrypt_s, height=1, width=10, font=("Arial", 20)).pack(pady=20)
@@ -165,10 +170,10 @@ def show_decrypt_ui():
     clear_ui()
     global cipher_text_entry, key_text_entry
     tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
-    cipher_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    cipher_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     cipher_text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (16位二进制)", font=("Arial", 12)).pack(pady=10)
-    key_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    key_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     key_text_entry.pack(pady=10)
     tk.Button(frame, text="二进制解密", command=decrypt_1, height=1, width=10, font=("Arial", 20)).pack(pady=20)
     tk.Button(frame, text="ascii解密", command=decrypt_s, height=1, width=10, font=("Arial", 20)).pack(pady=20)
@@ -178,10 +183,10 @@ def show_double_ui():
     clear_ui()
     global text_entry, key_text_entry
     tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
-    text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (32位二进制)", font=("Arial", 12)).pack(pady=10)
-    key_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    key_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     key_text_entry.pack(pady=10)
     tk.Button(frame, text="二重加密", command=encrypt_2, height=1, width=10, font=("Arial", 20)).pack(pady=20)
     tk.Button(frame, text="二重解密", command=decrypt_2, height=1, width=10, font=("Arial", 20)).pack(pady=20)
@@ -191,10 +196,10 @@ def show_triple_ui():
     clear_ui()
     global text_entry, key_text_entry
     tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
-    text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (48位二进制)", font=("Arial", 12)).pack(pady=10)
-    key_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    key_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     key_text_entry.pack(pady=10)
     tk.Button(frame, text="三重加密", command=encrypt_3, height=1, width=10, font=("Arial", 20)).pack(pady=20)
     tk.Button(frame, text="三重解密", command=decrypt_3, height=1, width=10, font=("Arial", 20)).pack(pady=20)
@@ -204,13 +209,13 @@ def show_cbc_ui():
     clear_ui()
     global text_entry, key_text_entry, iv_text_entry
     tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
-    text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (16位二进制)", font=("Arial", 12)).pack(pady=10)
-    key_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    key_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     key_text_entry.pack(pady=10)
     tk.Label(frame, text="请输入初始向量", font=("Arial", 12)).pack(pady=10)
-    iv_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    iv_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     iv_text_entry.pack(pady=10)
     tk.Button(frame, text="cbc加密", command=encrypt_cbc, height=1, width=10, font=("Arial", 20)).pack(pady=20)
     tk.Button(frame, text="cbc解密", command=decrypt_cbc, height=1, width=10, font=("Arial", 20)).pack(pady=20)
@@ -219,11 +224,11 @@ def show_cbc_ui():
 def show_brute_force_ui():
     clear_ui()
     global plain_text_entry, cipher_text_entry
-    tk.Label(frame, text="请输入明文", font=("Arial", 12)).pack(pady=10)
-    plain_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    tk.Label(frame, text="请输入一组或多组明文,以空格分隔", font=("Arial", 12)).pack(pady=10)
+    plain_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     plain_text_entry.pack(pady=10)
-    tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
-    cipher_text_entry = tk.Text(frame, height=1, width=20, font=("Arial", 20))
+    tk.Label(frame, text="请输入一组或多组密文,以空格分隔", font=("Arial", 12)).pack(pady=10)
+    cipher_text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     cipher_text_entry.pack(pady=10)
     tk.Button(frame, text="破解", command=brute_force_crack, height=1, width=10, font=("Arial", 20)).pack(pady=20)
 
@@ -234,7 +239,7 @@ def clear_ui():
 # 创建主窗口
 root = tk.Tk()
 root.title("S-DES 加密解密工具")
-root.geometry("600x400")
+root.geometry("1000x600")
 
 # 创建左侧菜单
 menu_frame = tk.Frame(root)
