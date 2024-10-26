@@ -238,7 +238,7 @@ def clear_ui():
 
 # 创建主窗口
 root = tk.Tk()
-root.title("S-DES 加密解密工具")
+root.title("S-AES 加密解密工具")
 root.geometry("1000x600")
 
 # 创建左侧菜单
