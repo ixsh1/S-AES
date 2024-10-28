@@ -286,11 +286,12 @@ def cbc_decrypt(cipher: str, key: int, iv: int) -> str:
 
 
 # 中间相遇攻击
-def attack(plaintexts: str, ciphertexts: str) -> int:
+def attack(plaintexts: str, ciphertexts: str) -> list:
     plaintexts = plaintexts.split()
     ciphertexts = ciphertexts.split()
 
     possible_keys = {}
+    found_keys = []
 
     # 遍历所有明文
     for plain in plaintexts:
@@ -307,10 +308,9 @@ def attack(plaintexts: str, ciphertexts: str) -> int:
             mid_value = decrypt(cipher_int, k2)
             if mid_value in possible_keys:
                 k1 = possible_keys[mid_value]
-                return (k1 << 16) | k2
+                found_keys.append((k1, k2))
 
-    return None  # 如果没有找到有效密钥
-
+    return found_keys
 
 
 if __name__ == '__main__':
@@ -371,12 +371,23 @@ if __name__ == '__main__':
     decrypted_text = decrypt_string('éVÍ^]bGíL¶È\'M', key)
     print("字符串解密结果:", decrypted_text)
 
-    # 中间相遇攻击测试
-    plaintexts = "1010011101001001 0101010101010101"
-    ciphertexts = "1100001101001001 1111111111111111"
+    # 双重加密测试
+    plain = 0xffff
+    key = 0xffff0000
+    cipher = double_encrypt(plain, key)
+    print("双重加密测试结果:", bin(cipher), hex(cipher))
 
-    found_key = attack(plaintexts, ciphertexts)
-    if found_key is not None:
-        print(f"找到的密钥: {found_key:016b}")
+    key = 0b11010100111001100101110111011111
+    cipher = double_encrypt(plain, key)
+    print("双重加密测试结果:", bin(cipher), hex(cipher))
+
+    # 中间相遇攻击测试
+    plaintexts = "1111111111111111"
+    ciphertexts = "0000011010011100"
+
+    found_keys = attack(plaintexts, ciphertexts)
+    if found_keys:
+        for k1, k2 in found_keys:
+            print(f"找到的密钥: {((k1 << 16) | k2):032b}")
     else:
         print("未找到密钥")
