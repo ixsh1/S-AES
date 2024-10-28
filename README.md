@@ -179,7 +179,7 @@ def attack(plaintexts: str, ciphertexts: str) -> list:
 ```
 #### 注意：项目具体测试实例请访问测试结果文档 
 
-[查看文档](https://github.com/your-username/your-repo/raw/main/path/to/your/doc/document.doc)
+[查看文档](https://github.com/your-username/your-repo/raw/main/测试结果.doc)
 
 
 ---
