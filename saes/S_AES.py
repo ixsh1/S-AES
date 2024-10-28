@@ -291,24 +291,30 @@ def attack(plaintexts: str, ciphertexts: str) -> list:
     ciphertexts = ciphertexts.split()
 
     possible_keys = {}
+
+    # 遍历第一个明密文对，生成初步候选密钥
+    plain = int(plaintexts[0], 2)
+    cipher = int(ciphertexts[0], 2)
+
+    for k1 in range(0x10000):
+        mid_value = encrypt(plain, k1)
+        possible_keys[mid_value] = k1
+
     found_keys = []
 
-    # 遍历所有明文
-    for plain in plaintexts:
-        plain_int = int(plain, 2)
-        for k1 in range(0x10000):
-            mid_value = encrypt(plain_int, k1)
-            if mid_value not in possible_keys:
-                possible_keys[mid_value] = k1
+    for k2 in range(0x10000):
+        mid_value = decrypt(cipher, k2)
+        if mid_value in possible_keys:
+            found_keys.append((possible_keys[mid_value], k2))
 
-    # 遍历所有密文
-    for cipher in ciphertexts:
-        cipher_int = int(cipher, 2)
-        for k2 in range(0x10000):
-            mid_value = decrypt(cipher_int, k2)
-            if mid_value in possible_keys:
-                k1 = possible_keys[mid_value]
-                found_keys.append((k1, k2))
+    # 用剩余明密文对验证并过滤候选密钥
+    for i in range(1, len(plaintexts)):
+        plain = int(plaintexts[i], 2)
+        cipher = int(ciphertexts[i], 2)
+        found_keys = [
+            (k1, k2) for k1, k2 in found_keys
+            if encrypt(plain, k1) == decrypt(cipher, k2)
+        ]
 
     return found_keys
 
