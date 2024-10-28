@@ -177,6 +177,7 @@ def attack(plaintexts: str, ciphertexts: str) -> list:
         ]
     return found_keys
 ```
-##### 注意：项目具体测试实例请访问测试结果文档 [查看文档]（）
+##### 注意：项目具体测试实例请访问测试结果文档 
+[查看文档]（https://github.com/ixsh1/SAES/blob/main/%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C.doc）
 ---
 <small> 注释：本次实验项目开发环境为python，基于 Tkinter 的 GUI 应用程序，如需修改或更新，请联系3328856646@qq.com。 </small>
