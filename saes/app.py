@@ -152,7 +152,14 @@ def brute_force_crack():
     plain_text = plain_text_entry.get("1.0", tk.END).strip()
     cipher_text = cipher_text_entry.get("1.0", tk.END).strip()
     keys = attack(plain_text, cipher_text)
-    show_custom_message("暴力破解结果", f"破解得到密钥: {bin(keys)[2:]}")
+
+    if keys:
+        key_strings = [f"密钥: {((k1 << 16) | k2):032b}" for k1, k2 in keys]
+        result_message = "\n".join(key_strings)
+    else:
+        result_message = "未找到密钥"
+
+    show_custom_message("暴力破解结果", result_message)
 
 def show_encrypt_ui():
     clear_ui()
@@ -182,7 +189,7 @@ def show_decrypt_ui():
 def show_double_ui():
     clear_ui()
     global text_entry, key_text_entry
-    tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
+    tk.Label(frame, text="请输入明/密文", font=("Arial", 12)).pack(pady=10)
     text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (32位二进制)", font=("Arial", 12)).pack(pady=10)
@@ -195,7 +202,7 @@ def show_double_ui():
 def show_triple_ui():
     clear_ui()
     global text_entry, key_text_entry
-    tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
+    tk.Label(frame, text="请输入明/密文", font=("Arial", 12)).pack(pady=10)
     text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (48位二进制)", font=("Arial", 12)).pack(pady=10)
@@ -208,7 +215,7 @@ def show_triple_ui():
 def show_cbc_ui():
     clear_ui()
     global text_entry, key_text_entry, iv_text_entry
-    tk.Label(frame, text="请输入密文", font=("Arial", 12)).pack(pady=10)
+    tk.Label(frame, text="请输入明/密文", font=("Arial", 12)).pack(pady=10)
     text_entry = tk.Text(frame, height=1, width=50, font=("Arial", 20))
     text_entry.pack(pady=10)
     tk.Label(frame, text="请输入密钥 (16位二进制)", font=("Arial", 12)).pack(pady=10)
